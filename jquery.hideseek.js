@@ -76,7 +76,8 @@
 
         if (e.keyCode != 38 && e.keyCode != 40 && e.keyCode != 13 && ( e.keyCode != 8 ? $this.val().length >= $this.opts.min_chars : true ) ) {
 
-          var q = $this.val().toLowerCase();
+          // var q = $this.val().toLowerCase();
+          var q = $this.val().toLowerCase().removeAccents($this.opts.ignore_accents);
 
           $list.children($this.opts.ignore.trim() ? ":not(" + $this.opts.ignore + ")" : '').removeClass('selected').each(function() {
 
@@ -141,6 +142,26 @@
           $this.trigger('_after');
 
         };
+
+        //https://github.com/vdw/HideSeek/issues/29
+        //Tumunu secip silince listenin sifirlamamasi problemine cozum
+        if (e.keyCode == 46 && this.value == ""){
+            $list.children($this.opts.ignore.trim() ? ":not(" + $this.opts.ignore + ")" : '').removeClass('selected').each(function() {
+
+              var data = (
+                          $this.opts.attribute != 'text'
+                            ? ($(this).attr($this.opts.attribute) || '')
+                            : $(this).text()
+                          ).toLowerCase();
+
+              var treaty = data.removeAccents($this.opts.ignore_accents).indexOf(q) == -1 || q === ($this.opts.hidden_mode ? '' : false)
+
+                $this.opts.highlight ? $(this).removeHighlight().highlight(q).show() : $(this).show();
+
+                $this.trigger('_after_each');
+
+            });
+        }
 
         // Navigation
         function current(element) {
@@ -236,7 +257,6 @@ String.prototype.removeAccents = function(enabled) {
                       .replace(/[íìïî]/gi,"i")
                       .replace(/[óòöôõ]/gi,"o")
                       .replace(/[úùüû]/gi, "u")
-                      .replace(/[ç]/gi, "c")
                       .replace(/[ñ]/gi, "n");
   return this;
 };
